@@ -16,33 +16,7 @@ app.use(express.static(path.join(__dirname,'public')));
 var driver= neo4j.driver('bolt://localhost',neo4j.auth.basic('neo4j','12345'));
 var session=driver.session();
 
-/*app.get('/',function(req,res){
-    
-    session
-    .run('MATCH(n:Login) RETURN n')
-    .then(function(results){
 
-        var loginArr=[];
-        results.records.forEach(function(record){
-            loginArr.push({
-                id:record._fields[0].identity.low,
-                type:record._fields[0].properties.type,
-                username:record._fields[0].properties.username,
-                password:record._fields[0].properties.password
-            })
-           // console.log(record._fields[0].properties);
-        });
-
-        res.render('index',{
-            Login:loginArr
-        });
-    })
-    .catch(function(err){
-        console.log(err);
-    });
-
-
-});*/
 app.get('/login/admin',function(req,res){
     
     res.render('adminLog');
@@ -58,6 +32,12 @@ app.get('/register',function(req,res){
    res.render('index');
 });
 
+//go back to admin home
+app.get('/admin/back',function(req,res){
+    
+    res.render('adminHome');
+ });
+
 
 app.post('/register/add',function(req,res){
 var name=req.body.name;
@@ -65,16 +45,37 @@ var email=req.body.email;
 var password=req.body.password;
 //console.log(name);
 session
-.run('CREATE(n:Register {name: {nameParam}, email:{emailParam}, password:{passwordParam}}) RETURN n.name',{nameParam:name, emailParam:email, passwordParam:password})
+.run('MATCH(p:Register) MERGE (n:Register {name: {nameParam}, email:{emailParam}, password:{passwordParam}}) RETURN p',{nameParam:name, emailParam:email, passwordParam:password})
 .then(function(result){
-    res.redirect('/');
+    var check;
+    
+   // res.render('login');
+   result.records.forEach(function(record){
+    var db=record._fields[0].properties;
+    
+    if(db.name==name){
+        check=1;
+    }
+
+  
+})
+if(check==1)
+{
+    console.log('Already registered');
+    res.render('login',{error:"Already registered"});
+  
+}
+else{
+    console.log('Successfully Registered');
+    res.render('login',{error:"Successfully registered"});
+}
 
    session.close();
 })
 .catch(function(err){
     console.log(err);
 });
-res.redirect('/');
+
 
 });
 
@@ -111,7 +112,7 @@ app.post('/login/add',function(req,res){
     });
 
 //admin Login
-app.post('/login/admin',function(req,res){
+app.post('/admin',function(req,res){
     var username=req.body.username;
  var password=req.body.password;
  //console.log(name);
@@ -208,7 +209,7 @@ app.post('/addrel',function(req,res){
  var relation=req.body.relation;
  //console.log(name);
  session
- .run('MATCH (a:Register{name:{nameParam}}),(b:Login) MERGE (a)-[r:LOGGED]-(b) RETURN a,b',{nameParam:name})
+ .run('MATCH (a:Register{name:{nameParam}}),(b:Login) MERGE (a)-[r:'+relation+']-(b) RETURN a,b',{nameParam:name})
  .then(function(results){
 
      res.redirect('/');
