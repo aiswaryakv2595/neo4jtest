@@ -16,17 +16,24 @@ app.use(express.static(path.join(__dirname,'public')));
 var driver= neo4j.driver('bolt://localhost',neo4j.auth.basic('neo4j','12345'));
 var session=driver.session();
 
-
+//Admin login
 app.get('/login/admin',function(req,res){
     
     res.render('adminLog');
   });
 
+//Login
 app.get('/login',function(req,res){
     
-  res.render('login');
+  res.render('login',{error:"login first"});
 });
+//logut
+app.get('/logout',function(req,res){
+    
+    res.render('login',{error:"Logout successfully"});
+  });
 
+//Registration
 app.get('/register',function(req,res){
     
    res.render('index');
@@ -85,7 +92,7 @@ app.post('/login/add',function(req,res){
     var password=req.body.password;
     //console.log(name);
     session
-    .run('MATCH (user:Register{email:{emailParam}}) RETURN user',{emailParam:email})
+    .run('MATCH (user:Register{email:{emailParam},password:{passParam}}) RETURN user',{emailParam:email,passParam:password})
     .then(function(results){
        
         
@@ -115,7 +122,7 @@ app.post('/login/add',function(req,res){
 app.post('/admin',function(req,res){
     var username=req.body.username;
  var password=req.body.password;
- //console.log(name);
+
  session
  .run('MATCH (admin:Login{username:{userParam}}) RETURN admin',{userParam:username})
  .then(function(results){

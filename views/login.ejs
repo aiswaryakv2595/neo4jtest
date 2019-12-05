@@ -1,9 +1,13 @@
+<link href="/css/style.css" rel="stylesheet" type="text/css">
+
+<div class="login-form">
 <h1>Login</h1>
-<%= error %>
+<div class="flash"><%= error %></div>
 <form method="POST" action="/login/add">
     <input type="text" placeholder="Username" name="email">
     <input type="password" placeholder="Password" name="password">
     <input type="submit" value="Submit">
+
     <a href="/register">New user</a>
 </form>
-
+</div>
